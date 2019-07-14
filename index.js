@@ -5,7 +5,10 @@ const history = require('connect-history-api-fallback');
 const logger = require('morgan');
 const config = require('config');
 
+// Config
 const port = config.get('Server.port');
+
+// Routes
 const apiRouter = require('./api');
 
 app
