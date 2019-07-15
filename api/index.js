@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const request = require('request-promise-native');
 const cheerio = require('cheerio');
+const win1251 = require('windows-1251');
 
 router
     .get('/torrents', (req, res) => {
@@ -9,17 +10,21 @@ router
         if (!title) return res.sendStatus(400);
 
         // Preparing the url
-        let url = `http://kinozal.tv/browse.php?s=${title}`;
+        let url = `http://kinozal.tv/browse.php?t=1&s=${encodeURIComponent(title)}`;
         if (year) url += `&d=${year}`;
         if (page) url += `&page=${page}`;
 
         // Search torrents on kinozal.tv
         request({
             url,
-            transform: html => cheerio.load(html)
+            encoding: 'binary'
         })
-            .then($ => {
+            .then(html => {
+                // Decode windows-1251
+                html = win1251.decode(html);
+
                 // Parsing of search results amount
+                const $ = cheerio.load(html);
                 let totalResults = +$('.tables1 tr:last-child td')
                     .text()
                     .replace(/[^\d]/g, '');
